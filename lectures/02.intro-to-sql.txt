@@ -1,0 +1,148 @@
+> Outline
+
+    - Overview of The SQL Query Language
+    - Data Definition
+    - Basic Query Structure
+    - Additional Basic Operations
+    - Set Operations
+    - Null Values
+    - Aggregate Functions
+    - Nested Subqueries
+    - Modification of the Database
+
+
+> History
+
+    - IBM Sequel language developed as part of System R project at the IBM San Jose Research Laboratory
+
+    - Renamed Structured Query Language (SQL)
+
+    - ANSI and ISO standard SQL:
+        * SQL-86
+        * SQL-89
+        * SQL-92
+        * SQL:1999
+        * SQL:2003
+
+
+> Data Definition Language
+
+    The SQL data-definition language (DDL) allows the specification of information about relations, including:
+
+    - The schema for each relation. (tabloların şeması)
+
+    - The domain of values associated with each attribute. (her bir sütunun bir veri tipi vardır)
+
+    - Integrity constraints. (primary key, secondary key, default değerler..)
+
+    - And also other information such as
+        
+        * The set of indices to be maintained for each relations. (tablodaki bazı değerlere-kayıtlara doğrudan ve hızlıca erişebilmek için tablolarda birden fazla indis tanımlayabiliyoruz)
+
+        * Security and authorization information for each relation.
+        
+        * The physical storage structure of each relation on disk.
+
+
+> Domain Types in SQL
+
+    - CHAR(n). Fixed length character string.
+    
+    - VARCHAR(n). Variable length character strings. Maximum length n. 
+
+    - INT
+
+    - SMALLINT
+
+    - NUMERIC(p,d). Fixed point number. With precision of p digits, with d digiths to the right of decimal point. (ex., NUMERIC(3,1) allows "44.5" to be stores exactly but not "444.5" or "0.32")
+
+    - REAL, DOUBLE precision. Floating point and double-precision floating point numbers with machine-dependent precision.
+
+    - FLOAT(n). Floating point number, with user-specified precision of at least n digits.
+
+
+> Create Table Construct
+
+    CREATE TABLE instructor(
+        ID          CHAR(5),
+        name        VARCHAR(20),
+        dept_name   VARCHAR(20),
+        salary      numeric(8,2)
+    );
+
+
+> Integrity Constarints in Create Table
+
+    - NOT NULL
+
+    - PRIMARY KEY (a1,...,an)
+
+    - FOREIGN KEY (a1,..,an) REFERENCES r
+
+    CREATE TABLE instructor(
+        ID          CHAR(5),
+        name        VARCHAR(20) NOT NULL,
+        dept_name   VARCHAR(20),
+        salary      numeric(8,2),
+        PRIMARY KEY (ID),
+        FOREIGN KEY (dept_name) REFERENCES department
+    );
+
+    *primary key declaration on an attribute automatically ensures "not null".
+
+
+    CREATE TABLE student(
+        ID          VARCHAR(5),
+        name        VARCHAR(20) NOT NULL,
+        dept_name   VARCHAR(20),
+        tot_cred    numeric(3,0),
+        PRIMARY KEY (ID),
+        FOREIGN KEY (dept_name) REFERENCES department
+    );
+
+    CREATE TABLE takes(
+        ID          VARCHAR(5),
+        course_id   VARCHAR(8),
+        sec_id      VARCHAR(8),
+        semester    VARCHAR(6),
+        year        numeric(4,0),
+        grade       VARCHAR(2),
+        PRIMARY KEY (ID, course_id, sec_id, semester, year),
+        FOREIGN KEY (ID) REFERENCES student,
+        FOREIGN KEY (course_id, sec_id, semester, year) REFERENCES section
+    );
+
+
+> Updates to Tables
+
+    - INSERT
+
+        * INSERT INTO instructor VALUES ('10211', 'Smith', 'Biology', 66000);
+
+    - DELETE
+    
+        * DELETE FROM student;
+        (Remove all tuples from the student relation)
+
+    - DROP TABLE
+
+        * DROP TABLE r;
+
+    - ALTER
+
+        * ALTER TABLE r ADD A D;
+
+        > Where A is the name of the attribute to be added to relation r and D is the domain of A.
+
+        > All exiting tuples in the relation are assigned "NULL" as the value for the new attribute.
+
+        ALTER TABLE student ADD password INTEGER;
+
+
+        * ALTER TABLE r DROP A;
+
+        > Where A is the name of an attribute of relation r
+
+        > Dropping of attributes not supported by many databases.
+
+        ALTER TABLE student DROP password;

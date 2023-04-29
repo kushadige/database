@@ -1,0 +1,219 @@
+MYSQL (Xampp v1.6 => MYSQL+Apache+Php+...), PostgreSQL, MongoDB
+
+Apache      => Web Server
+MySQL       => Database Server
+FileZilla   => FTP Server
+Mercury     => E-mail Server
+Tomcat      => Application Server (Java Web Server)
+
+Bir uygulamayı servis olarak kurmak, bilgisayar her başladığında uygulamanın arkaplanda otomatik olarak başlatılıp çalıştırılacağı anlamına gelir.
+
+mysql.exe   => client
+mysqld.exe  => server
+
+Client-Server modelinde çalışan bir veritabanı, bir merkez server ayağa kaldıracak ve o server'a erişebilecek birçok client'a izin verebilme kabiliyetine sahip olacaktır.
+
+
+> DBMS - Database Management System
+
+    - Veritabanı oluşturma, erişim, koruma gibi işlemlerden sorumlu modüler yazılım
+
+    - Örnek: Oracle, MS SQL Server, MySQL,...
+
+
+> Veri (Data)
+
+    - Veri atomik (bölünmez) bir değerdir.
+        * Örnek: 23, "Ali",...
+
+    - Veritabanında veri saklanır bilgi değil
+
+    - Verinin tipi (türü) vardır.
+        * Örnek: integer, string,...
+
+
+> Veritabanı
+
+    - Veritabanı bir tablo kümesidir
+        * Okul = {ogrenci, hoca, ders, ders-al, ders-ver}
+
+    - Tablo bir kayıt kümesidir
+        * Öğrenci = {[1, 'Ali', 'Demir'], [2, 'Ayşe', 'Yıldız']}
+
+    Varlık Kümesi - İlişki Kümesi (Varlıklar arası ilişki)
+
+    Tablo=Class - Kayıt=Nesne
+
+
+> Veritabanı Şeması (Schema)
+
+    student (sid, fname, lname, did) - öğrenci kayıtlarını tutar
+    teacher (tid, fname, lname, did) - hoca kayıtlarını tutar
+    course (code, title, credits, did) - ders kayıtlarını tutar
+    department (did, dname) - bölüm bilgilerini tutar
+    take (sid, code, grade) - hangi öğrencinin hangi dersi aldığı bilgisini tutar (ilişki kümesi)
+    teach (tid, code) - hangi hocanın hangi dersi verdiği bilgisini tutar (ilişki kümesi)
+
+
+> Tablo İşlemleri
+
+    - Tablo verisi üzerinde işlemler
+        * Sık kullanılırlar
+        * Veri üzerinde değişiklik yapma hakkı olan kullanıcılarca yapılır
+        * Bir kayıda doğrudan erişim için anahtar değeri kullanılır
+            > Örnek: WHERE ogrno=1
+        * Belirli şartları sağlayan kayıtlara erişim için filtreleme (WHERE) kullanılır
+            > Örnek: WHERE adi LIKE 'A%'
+
+    - Tablo yapısı üzerinde işlemler
+        * Nadiren kullanılırlar
+        * Sonuçları bakımından özenle yapılması gerekmektedir
+        * VT yöneticisi (DBA) gibi kullanıcılarca yapılır
+
+
+> Tablo İşlemleri (SQL)
+
+    - Tablo verisi üzerinde işlemler
+        * Kayıt ekleme (INSERT komutu)
+        * Kayıt silme (DELETE komutu)
+        * Kayıt güncelleme (UPDATE komutu)
+        * Kayıtlara erişim (SELECT komutu)
+
+    - Tablo yapısı üzerinde işlemler
+        * Tablo oluşturma (CREATE TABLE komutu)
+        * Tablo silme (DROP TABLE komutu)
+        * Yapısal değişiklikler (ALTER TABLE komutu)
+
+
+> Kayıt ekleme (INSERT komutu)
+
+    - Bir defada sadece bir tabloya ekleme yapılabilir
+    - Yeni kayıdın tabloda nereye eklendiği önemli değildir
+    - Eklenen kayıda sonradan erişim için kayıttaki bir değeri diğer bütün kayıtlardaki aynı alandaki değerlerden farklı bir değer olması (unique-tekil) gerekir. Bu değeri tutan alana birincil anahtar (primary key) denir. Örnek: öğrenci numarası: ogrno
+    - Birincil anahtarı olmayan bir tabloya aynı kayıt birden fazla kez eklenebilir. Fakat bu durum veri bütünlüğünü zedeler.
+    
+    - INSERT INTO ogrenci (ogrno, adi, soyadi) VALUES (1, 'Ali', 'Demir');
+        * 1 kayıt ekler
+
+    - INSERT INTO ogrenci VALUES (1, 'Ali', 'Demir');
+
+    - INSERT INTO ogrenci VALUES (1, 'Ali', 'Demir'), (2, 'Ayşe', 'Yıldız');
+        * 2 kayıt ekler
+
+
+> MySQL Veritabanına Bağlanmak
+
+    mysql -u root -p
+
+    MariaDB'ye bağlandıktan sonra "help" komutu ile mysql client'ının komutlarını görüntüleyebiliriz.
+
+
+> SQL Komutları
+
+    SHOW DATABASES; -> DB'leri listeler
+
+    CREATE DATABASE deneme1; -> "deneme1" adında DB oluşturur
+
+    USE deneme1;
+
+    SHOW TABLES;
+
+    CREATE TABLE ogrenci(no INTEGER, adi CHAR(10), soyadi CHAR(10));
+
+    DESCRIBE ogrenci; -> Tablo yapısını gösterir
+    DESC
+
+    INSERT INTO ogrenci(no, adi, soyadi) VALUES(12, 'Ali', 'Kurt'), (13, 'Deniz', 'Demir');
+
+    SELECT * FROM ogrenci;
+
+    SELECT no, adi FROM ogrenci;
+
+    SELECT no, adi FROM ogrenci WHERE adi = 'Ayse';
+
+    - AND, OR, NOT -
+    SELECT * FROM ogrenci WHERE adi > 'B' AND no >= 14;
+
+
+    SELECT sutun-listesi
+    FROM tablo-listesi
+    WHERE kosul(lar)
+
+
+    WHERE A=B ^ D > 5
+    SELECT A, C
+    FROM r, s
+    r UNION s
+    r EXCEPT s
+    SELECT b1 AS a1, ... Bn AS an FROM r AS x
+
+
+> Keys (foreign key, primary key)
+
+    CREATE TABLE student
+    (sid INTEGER(5) NOT NULL,
+    fname VARCHAR(30) NOT NULL,
+    lname VARCHAR(30),
+    birthdate DATE,
+    birthplace VARCHAR(50),
+    did INTEGER(5),
+    FOREIGN KEY (did) references department(did),
+    PRIMARY KEY (sid));
+
+
+> JOIN
+
+    SELECT * FROM student, take WHERE student.sid = take.sid;
+
+    JOIN iki farklı tablodaki eşleşen kayıtları birleştirmek anlamında kullanılan bir kavramdır.
+
+
+> İsimlendirmeler
+
+    SELECT * FROM student AS s;
+
+    veya
+
+    SELECT * FROM student s;
+
+    SELECT * FROM student s WHERE s.sid > 6;
+
+
+    SELECT sid, fname FROM student;
+
+    SELECT sid no, fname adi, lname AS soyadi FROM student s;
+
+
+> CONCAT
+
+    SELECT sid no, CONCAT(fname, ' ', lname) isim FROM student;
+
+
+> UNION
+
+    SELECT sid FROM student UNION SELECT sid FROM take;
+
+
+> INTERSECT
+
+    SELECT expression1, expression2, ... expression_n
+    FROM tables
+    [WHERE conditions]
+    INTERSECT
+    SELECT expression1, expression2, ... expression_n
+    FROM tables
+    [WHERE conditions];
+
+    
+> EXCEPT
+
+    (SELECT e_name AS name, email FROM customers)
+    EXCEPT
+    (SELECT c_name AS name, email FROM employees);
+
+
+> DISTINCT
+
+    Tekrarlı kayıtları bir defa listelemek için SELECT cümleciğinde DISTINCT anahtar kelimesi kullanılır. (duplicate elimination)
+
+    SELECT DISTINCT birthplace FROM student;
