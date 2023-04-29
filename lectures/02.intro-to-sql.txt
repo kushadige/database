@@ -146,3 +146,339 @@
         > Dropping of attributes not supported by many databases.
 
         ALTER TABLE student DROP password;
+
+
+> SELECT Clause
+
+    - The "SELECT" clause lists the attributes desired in the result of a query
+
+        SELECT name
+        FROM instructor;
+
+    *SQL names are case insensitive.
+
+        SELECT DISTINCT dept_name
+        FROM INSTRUCTOR;
+
+        SELECT ALL dept_name
+        FROM instructor;
+
+    - The keyword "ALL" specifies that duplicates should not be removed. (DEFAULT value)
+
+    - An asterisk (*) in the select clause denotes "all attributes".
+
+    - An attribute can be a literal with no "FROM" clause
+
+        SELECT '353';
+
+    - An attribute can be a literal with "FROM" clause
+
+        SELECT 'A' FROM instructor;
+
+        (Result is a table with one column and N rows, number of tuples in the instructors table, each row with value 'A')
+
+        SELECT 3+3 'TOPLAM', 'A', sid NO FROM student;
+
+
+> WHERE Clause
+
+    - The WHERE clause specifies conditions that the result must satisfy
+
+    - To find all instructors in Comp. Sci. dept:
+
+        SELECT name
+        FROM instructor
+        WHERE dept_name = 'Comp. Sci.';
+
+    - Comparison results can be combined using the logical connectives AND, OR and NOT.
+
+    - To find all instructors in Comp. Sci. dept with salary > 80000:
+
+        SELECT name
+        FROM instructor
+        WHERE dept_name = 'Comp. Sci.' 
+            AND
+            salary > 80000;
+
+
+> FROM Clause 
+
+    - The FROM clause lists the relations involved in the query
+
+    - Find the Cartesian product instructor X teaches:
+
+        SELECT *
+        FROM instructor, teaches;
+
+        (It generates every possible instructor - teaches pair with all attributes from both relations.)
+
+    - Cartesian product not very useful directly but useful combined with "WHERE" clause condition.
+
+        SELECT *
+        FROM department d, student s
+        WHERE d.did = s.did;
+
+        SELECT name, course_id
+        FROM instructor i, teaches t
+        WHERE i.ID = t.ID
+            AND
+            i.dept_name = 'Art';
+
+
+> Queries with Rename Operation
+
+    - Find the names of all instructors who have a higher salary than some instructor in 'Comp. Sci.':
+
+        SELECT DISTINCT T.name
+        FROM instructor as T, instructor as S
+        WHERE T.salary > S.salary
+            AND
+            S.dept_name = 'Comp. Sci.';
+
+
+    - Keyword "AS" is optional and may be omitted.
+
+        instructor as T === instructor T
+
+
+> Cartesian Product Example
+
+    - Relation emp_super
+
+        -----------------------
+        | person | supervisor |
+        |---------------------|
+        | Bob    | Alice      |
+        |--------|------------|
+        | Mary   | Susan      |
+        |--------|------------|
+        | Alice  | David      |
+        |--------|------------|
+        | David  | Mary       |
+        -----------------------
+
+    - Find the supervisor of "Bob":
+
+        SELECT t.supervisor
+        FROM emp_super AS t
+        WHERE person = 'Bob';
+
+    - Find the supervisor of the supervisor of "Bob":
+
+        *(1)
+
+        SELECT r.supervisor 
+        FROM emp_super AS r 
+        WHERE r.person = (
+            SELECT e.supervisor 
+            FROM emp_super AS e 
+            WHERE e.person = 'Bob'
+        );
+
+        *(2)
+
+        SELECT b.supervisor 
+        FROM emp_super a, emp_super b 
+        WHERE a.person = 'Bob' 
+            AND 
+            a.supervisor = b.person;
+
+    - Find ALL the supervisors (direct and indirect) of "Bob"
+
+        
+> String Operations
+
+    - SQL includes a string-matching operator for comparisons on character strings. The operator "LIKE" uses patterns that are described using two special characters:
+
+        * percent (%). The "%" character matches any substring.
+
+        * underscore (_). The "_" character matches any character.
+
+    - Find the names of all instructors whose name includes the substring "dar":
+
+        SELECT name
+        FROM instructor
+        WHERE name LIKE '%dar%';
+
+        'A%'
+        '%A'
+        '%A%'
+        '_A_'
+        '_A%'
+        '___' -> matches any string of exactly three characters.
+
+    - Match the string "100%":
+
+        LIKE '100\%' ESCAPE '\\'
+
+        * in that above we use backslash (\) as the escape character.
+
+    - SQL supports a variety of string operations such as
+
+        * concatenation (using "||" *oracle)
+        * converting from upper to lower case (and vice versa)
+        * finding string length, extracting substrings, etc.
+
+
+> ORDERing the Display of Tuples
+
+    - List in alphabetic order the names of all instructors:
+
+        SELECT DISTINCT name
+        FROM instructor
+        ORDER BY name;
+
+    - We may specify "DESC" for descending order or "ASC" for ascending order, for each attribute; ascending order is the default.
+
+        ...
+        ORDER BY name DESC;
+
+    - Can sort on multiple attributes
+
+        ...
+        ORDER BY dept_name, name;
+
+    
+> BETWEEN
+
+    - SQL includes a between comparison operator
+
+    - Find the names of all instructors with salary between $90.000 and $100.000:
+
+        SELECT name
+        FROM instructor
+        WHERE salary BETWEEN 90000 AND 100000;
+
+
+> Tuple Comparison
+
+    SELECT name, course_id
+    FROM instructor, teaches
+    WHERE (instructor.ID, dept_name) = (teaches.ID, 'Biology');
+
+
+> Set Operations (UNION, INTERSECT, EXCEPT)
+
+    - Find courses that ran in Fall 2009 or in Spring 2010:
+
+        (SELECT course_id
+        FROM section
+        WHERE sem = 'Fall' and year = 2009)
+            UNION
+        (SELECT course_id
+        FROM section
+        WHERE sem = 'Spring' and year = 2010);
+
+    - Find courses that ran in Fall 2009 and in Spring 2010:
+
+        (SELECT course_id
+        FROM section
+        WHERE sem = 'Fall' and year = 2009)
+            INTERSECT
+        (SELECT course_id
+        FROM section
+        WHERE sem = 'Spring' and year = 2010);
+
+    - Find courses that ran in Fall 2009 but not in Spring 2010:
+
+        (SELECT course_id
+        FROM section
+        WHERE sem = 'Fall' and year = 2009)
+            EXCEPT
+        (SELECT course_id
+        FROM section
+        WHERE sem = 'Spring' and year = 2010);
+
+
+> IS NULL / IS NOT NULL
+
+    SELECT * 
+    FROM instructor 
+    WHERE salary IS NOT NULL;
+
+
+> Aggregate Functions (SUM & AVG & MAX & MIN)
+
+    - These functions operate on the multiset of values of a column of a relation, and return a value
+
+        AVG:    average value
+        MIN:    minimum value
+        MAX:    maximum value
+        SUM:    sum of values
+        COUNT:  number of values
+
+    - Find MAX salary with Cartesian:
+
+        SELECT salary 
+        FROM instructor 
+        EXCEPT (
+            SELECT DISTINCT s1.salary 
+            FROM instructor s1, instructor s2
+            WHERE s1.salary < s2.salary
+        );
+
+
+    - Examples:
+
+        SELECT COUNT(*) FROM student;
+
+        SELECT COUNT(*) sayisi FROM student WHERE sid > 4;
+
+        SELECT AVG(sid) FROM student;
+
+        SELECT MAX(sid) FROM student;
+
+        SELECT COUNT(sid), MAX(sid), MIN(sid), AVG(sid), SUM(sid), COUNT(DISTINCT did)
+        FROM student;
+
+
+> GROUP BY
+
+    SELECT COUNT(*), AVG(sid), birthplace
+    FROM student GROUP BY birthplace;
+
+    - Find maximum grade that taken from each course:
+
+        SELECT cid, MAX(grade)
+        FROM take GROUP BY cid;
+
+
+    - Examples    
+
+        SELECT course.title, T1.*
+        FROM (SELECT cid, COUNT(sid), MIN(grade), MAX(grade), AVG(grade)
+            FROM take GROUP BY cid) T1,
+            course
+        WHERE T1.cid = course.cid;
+
+
+        SELECT sid, COUNT(cid), AVG(grade)
+        FROM take
+        GROUP BY sid
+        ORDER BY AVG(grade) DESC;
+
+
+        SELECT CONCAT(S.fname, ' ', S.lname) AS student_name, T1.*
+        FROM student S, (SELECT sid, COUNT(cid), AVG(grade) avg_grade
+                        FROM take
+                        GROUP BY sid) T1
+        WHERE S.sid = T1.sid 
+        ORDER BY T1.avg_grade DESC;
+
+
+> HAVING Clause
+
+    - Find the names and average salaries of all departments whose average salary is greater than 42000:
+
+        SELECT dept_name, AVG(salary)
+        FROM instructor
+        GROUP BY dept_name
+        HAVING AVG(salary) > 42000;
+
+    *** predicates in the HAVING clause are applied after the formation of groups whereas predicates in the WHERE clause are applied before forming groups.
+
+        SELECT * 
+        FROM (SELECT dept_name, AVG(salary) avg_salary
+            FROM instructor
+            GROUP BY dept_name) X
+        WHERE X.avg_salary > 42000;
